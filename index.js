@@ -1,44 +1,47 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require('discord.js');
+require('./deploy-commands'); // 봇 실행 시 명령어 자동 등록 --> 개발떄만 유지 배포시에는 제거 바람 node deploy-commands.js 명령어 실행과 같음
+const fs = require('node:fs');
+const path = require('node:path');
+const { Client, Collection, GatewayIntentBits } = require('discord.js');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
 });
 
-const commands = [
-  new SlashCommandBuilder()
-    .setName('ping')
-    .setDescription('pong을 반환합니다.'),
-].map(command => command.toJSON());
+client.commands = new Collection();
 
-const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+// 명령어 파일 로드
+const commandsPath = path.join(__dirname, 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
-// 명령어 등록
-(async () => {
-  try {
-    console.log('⏳ 슬래시 명령어를 등록 중...');
-    await rest.put(
-      Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_GUILD_ID),
-      { body: commands },
-    );
-    console.log('✅ 슬래시 명령어 등록 완료!');
-  } catch (error) {
-    console.error(error);
+for (const file of commandFiles) {
+  const filePath = path.join(commandsPath, file);
+  const command = require(filePath);
+  if ('data' in command && 'execute' in command) {
+    client.commands.set(command.data.name, command);
+  } else {
+    console.warn(`[경고] ${file}은 data 또는 execute 속성이 없습니다.`);
   }
-})();
+}
 
-// 봇 응답 로직
+// 슬래시 명령어 실행 처리
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
-  if (interaction.commandName === 'ping') {
-    await interaction.reply('Pong!');
+  const command = client.commands.get(interaction.commandName);
+  if (!command) return;
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    await interaction.reply({ content: '❌ 명령어 실행 중 오류가 발생했습니다.', ephemeral: true });
   }
 });
 
-client.once('ready', () => {
-  console.log(`🤖 로그인됨: ${client.user.tag}`);
+client.once('clientReady', () => {
+  console.log(`✅ 로그인 완료: ${client.user.tag}`);
 });
 
-// 로그인
+
 client.login(process.env.DISCORD_TOKEN);
