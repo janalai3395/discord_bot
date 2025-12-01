@@ -1,2 +1,15 @@
+# Node modules
 node_modules/
+
+# 환경 변수
 .env
+
+# 로그 파일
+npm-debug.log*
+
+# 에디터 설정
+.vscode/
+
+# OS 파일
+.DS_Store
+Thumbs.db
