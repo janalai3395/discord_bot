@@ -17,19 +17,15 @@ for (const file of commandFiles) {
   }
 }
 
-const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
-await rest.put(
-  Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
-  { body: commands },
-);
-
 (async () => {
+  const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+
   try {
     console.log('📦 슬래시 명령어 등록 시작 중...');
 
     await rest.put(
       Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_GUILD_ID),
-      { body: commands },
+      { body: commands }
     );
 
     console.log('✅ 슬래시 명령어 등록 완료!');

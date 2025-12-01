@@ -1,3 +1,4 @@
+// commands/summoner.js
 const { SlashCommandBuilder } = require('discord.js');
 const { getPuuidByRiotId } = require('../riot');
 
@@ -8,7 +9,7 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName('game_name')
-        .setDescription('소환사의 이름 (예: 모카가오리맛쿠키)')
+        .setDescription('소환사의 이름 (예: Hideonbush)')
         .setRequired(true))
     .addStringOption(option =>
       option
@@ -23,15 +24,16 @@ module.exports = {
     await interaction.deferReply();
 
     try {
-      const puuidData = await getPuuidByRiotId(gameName, tagLine);
-      if (!puuidData) {
-        return await interaction.editReply('❌ 소환사 정보를 가져오지 못했습니다. 이름과 태그를 다시 확인해주세요.');
+      const puuid = await getPuuidByRiotId(gameName, tagLine);
+
+      if (!puuid) {
+      return await interaction.editReply('❌ 소환사 정보를 가져올 수 없습니다. 이름과 태그를 확인해주세요.');
       }
 
-      await interaction.editReply(`🔍 **${gameName}#${tagLine}** 님의 PUUID:\n\`${puuidData.puuid}\``);
+      await interaction.editReply(`🔍 **${gameName}#${tagLine}** 님의 PUUID:\n\`${puuid}\``);
     } catch (error) {
-      console.error('❌ Riot API 에러:', error);
+      console.error('Riot API 오류:', error);
       await interaction.editReply('⚠️ Riot API 요청 중 오류가 발생했습니다.');
     }
-  },
+  }
 };

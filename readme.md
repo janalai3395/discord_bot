@@ -4,17 +4,17 @@
 
 ## 명령어
 
-* `/ping`: Pong! 응답
+* `/summoner`: 소환사의 PUUID를 반환
+* `/rank`: 소환사의 rank 정보를 반환
 
 ## 실행 방법
 
 ```bash
-npm install
-node index.js
+npm run deploy
+npm start
 ```
 
 ## 기능 추가 계획 (수행 중)
 
-* `/롤 닉네임`: 롤(LoL) 전적 검색 (RIOT API 연계)
-* `/포켓몬 이름`: 포커텐 도감 기능 (pokeapi 연동 예정)
+* `/pocketmon 이름`: 포켓몬 도감 기능 (DB 를 이용해서 해볼 예정)
 
